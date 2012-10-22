@@ -227,6 +227,11 @@ public class SlidingMenu extends RelativeLayout {
 		mViewAbove.setCurrentItem(1);
 	}
 
+	public void wiggleBehind() {
+		if (!isBehindShowing())
+			mViewAbove.wiggle();
+	}
+
 	/**
 	 * 
 	 * @return Whether or not the behind view is showing

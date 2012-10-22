@@ -56,6 +56,9 @@ public class CustomViewAbove extends ViewGroup {
 
 	private int mCurItem;
 	private Scroller mScroller;
+	private Scroller mNormalScroller;
+	private Scroller mWiggleScroller;
+	private WiggleInterpolator mWiggleInterpolator;
 
 	private int mShadowWidth;
 	private Drawable mShadowDrawable;
@@ -178,7 +181,10 @@ public class CustomViewAbove extends ViewGroup {
 		setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
 		setFocusable(true);
 		final Context context = getContext();
-		mScroller = new Scroller(context, sInterpolator);
+		mNormalScroller = new Scroller(context, sInterpolator);
+		mWiggleInterpolator = new WiggleInterpolator(1);
+		mWiggleScroller = new Scroller(context, mWiggleInterpolator);
+		mScroller = mNormalScroller;
 		final ViewConfiguration configuration = ViewConfiguration.get(context);
 		mTouchSlop = ViewConfigurationCompat.getScaledPagingTouchSlop(configuration);
 		mMinimumVelocity = configuration.getScaledMinimumFlingVelocity();
@@ -488,11 +494,36 @@ public class CustomViewAbove extends ViewGroup {
 		} else {
 			final float pageDelta = (float) Math.abs(dx) / (width + mShadowWidth);
 			duration = (int) ((pageDelta + 1) * 100);
+			// TODO set custom duration!
 			duration = MAX_SETTLE_DURATION;
 		}
 		duration = Math.min(duration, MAX_SETTLE_DURATION);
 
+		mScroller = mNormalScroller;
 		mScroller.startScroll(sx, sy, dx, dy, duration);
+		invalidate();
+	}
+
+	void wiggle() {
+		if (getChildCount() == 0) {
+			// Nothing to do.
+			setScrollingCacheEnabled(false);
+			return;
+		}
+		int sx = getScrollX();
+		int sy = getScrollY();
+		int dx = 0 - sx / 3;
+		int dy = sy;
+		if (dx == 0 && dy == 0) {
+			completeScroll();
+			return;
+		}
+
+		setScrollingCacheEnabled(true);
+		mScrolling = true;
+
+		mScroller = mWiggleScroller;
+		mScroller.startScroll(sx, sy, dx, dy, 1500);
 		invalidate();
 	}
 
@@ -620,6 +651,13 @@ public class CustomViewAbove extends ViewGroup {
 			int oldY = getScrollY();
 			int x = mScroller.getCurrX();
 			int y = mScroller.getCurrY();
+
+			if (mScroller == mWiggleScroller) {
+				mWiggleInterpolator.setEndReached(false);
+				mScroller = mNormalScroller;
+				x = getBehindWidth();
+			}
+
 			if (oldX != x || oldY != y) {
 				scrollTo(x, y);
 			}
