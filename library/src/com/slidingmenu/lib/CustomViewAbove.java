@@ -748,11 +748,11 @@ public class CustomViewAbove extends ViewGroup {
 		switch (action) {
 		case MotionEvent.ACTION_MOVE:
 			final int activePointerId = mActivePointerId;
-			if (activePointerId == INVALID_POINTER)
+			if (activePointerId == INVALID_POINTER || activePointerId >= ev.getPointerCount())
 				break;
 
 			final int pointerIndex = MotionEventCompat.findPointerIndex(ev, activePointerId);
-			if (pointerIndex==-1) {
+			if (pointerIndex == -1) {
 				mActivePointerId = INVALID_POINTER;
 				break;
 			}
@@ -842,6 +842,10 @@ public class CustomViewAbove extends ViewGroup {
 		case MotionEvent.ACTION_MOVE:
 			if (!mIsBeingDragged) {
 				final int pointerIndex = MotionEventCompat.findPointerIndex(ev, mActivePointerId);
+				if (pointerIndex==-1) {
+					mActivePointerId = INVALID_POINTER;
+					break;
+				}
 				final float x = MotionEventCompat.getX(ev, pointerIndex);
 				final float xDiff = Math.abs(x - mLastMotionX);
 				final float y = MotionEventCompat.getY(ev, pointerIndex);
@@ -858,6 +862,10 @@ public class CustomViewAbove extends ViewGroup {
 				// Scroll to follow the motion event
 				final int activePointerIndex = MotionEventCompat.findPointerIndex(
 						ev, mActivePointerId);
+				if (activePointerIndex==-1) {
+					mActivePointerId = INVALID_POINTER;
+					break;
+				}
 				final float x = MotionEventCompat.getX(ev, activePointerIndex);
 				final float deltaX = mLastMotionX - x;
 				mLastMotionX = x;
@@ -888,6 +896,10 @@ public class CustomViewAbove extends ViewGroup {
 				final float pageOffset = (float) (scrollX % widthWithMargin) / widthWithMargin;
 				final int activePointerIndex =
 						MotionEventCompat.findPointerIndex(ev, mActivePointerId);
+				if (activePointerIndex==-1) {
+					mActivePointerId = INVALID_POINTER;
+					break;
+				}
 				final float x = MotionEventCompat.getX(ev, activePointerIndex);
 				final int totalDelta = (int) (x - mInitialMotionX);
 				int nextPage = determineTargetPage(currentPage, pageOffset, initialVelocity,
