@@ -2,6 +2,7 @@ package com.slidingmenu.lib;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -99,6 +100,11 @@ public class CustomViewBehind extends CustomViewAbove {
 			canvas.restore();
 		} else
 			super.dispatchDraw(canvas);
+	}
+	
+	@Override
+	protected boolean onRequestFocusInDescendants(int direction, Rect previouslyFocusedRect) {
+		return false; // super.onRequestFocusInDescendants(direction, previouslyFocusedRect);
 	}
 
 }
